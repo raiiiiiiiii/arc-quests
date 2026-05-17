@@ -278,7 +278,7 @@ export default function ConnectWallet() {
 
             {/* Header */}
             <div className="connect-form-header">
-              <div className="connect-hex-logo">⬡</div>
+              <img src="/arc-logo.svg" alt="Arc Logo" className="arc-logo arc-logo-lg" style={{ marginBottom: '16px', display: 'block', margin: '0 auto 16px auto' }} />
               <h1>Connect to <span className="gradient-text">Arc Quest</span></h1>
               <p>Choose your wallet to enter the Arc blockchain universe</p>
             </div>

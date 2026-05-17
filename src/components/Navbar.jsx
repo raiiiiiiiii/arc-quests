@@ -43,7 +43,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link to={address ? '/dashboard' : '/'} className="navbar-logo">
           <div className="navbar-logo-icon">
-            <span>⬡</span>
+            <img src="/arc-logo.svg" alt="Arc Logo" className="arc-logo arc-logo-sm" />
           </div>
           <span className="navbar-logo-text">
             Arc<span className="neon-text-blue">Quest</span>

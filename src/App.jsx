@@ -42,7 +42,9 @@ function InitialLoader({ onComplete }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
+        style={{ textAlign: 'center' }}
       >
+        <img src="/arc-logo.svg" alt="Arc Logo" className="arc-logo arc-logo-xl" style={{ display: 'block', margin: '0 auto 20px auto' }} />
         ARC QUEST
       </motion.div>
       <div className="loader-bar">

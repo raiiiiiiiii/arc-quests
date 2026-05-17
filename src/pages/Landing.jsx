@@ -59,6 +59,7 @@ export default function Landing() {
             Breach the
             <span className="gradient-text"> Arc Nexus.</span>
             <br />
+            <img src="/arc-logo.svg" alt="Arc Logo" className="arc-logo arc-logo-md" style={{ verticalAlign: 'middle', marginRight: '10px' }} />
             Master the Network.
           </motion.h1>
 
@@ -216,7 +217,10 @@ export default function Landing() {
         <div className="container">
           <div className="footer-inner">
             <div className="footer-brand">
-              <span className="navbar-logo-text">Arc<span className="neon-text-blue">Quest</span></span>
+              <span className="navbar-logo-text" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <img src="/arc-logo.svg" alt="Arc Logo" className="arc-logo arc-logo-sm" />
+                Arc<span className="neon-text-blue">Quest</span>
+              </span>
               <p>Powered by Arc Testnet · Tactical Onchain Experience</p>
             </div>
             <div className="footer-links">

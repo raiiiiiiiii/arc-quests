@@ -66,6 +66,7 @@ function NFTBadgeCard({ badge }) {
       animate={{ opacity: 1, scale: 1 }}
     >
       <div className="nft-badge-glow" />
+      <img src="/arc-logo.svg" alt="" className="arc-logo-watermark" />
       <div className="nft-badge-icon-wrap">
         <span className="nft-badge-emoji">{badge.icon}</span>
       </div>

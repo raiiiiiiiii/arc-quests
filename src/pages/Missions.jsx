@@ -387,7 +387,7 @@ export default function Missions() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div>
-            <h1>Mission <span className="gradient-text">Center</span></h1>
+            <h1><img src="/arc-logo.svg" alt="Arc Logo" className="arc-logo arc-logo-md" style={{ verticalAlign: 'text-bottom', marginRight: '12px' }} /> Mission <span className="gradient-text">Center</span></h1>
             <p className="page-subtitle">
               {gameState.completedMissions.length} of {MISSIONS.filter(m => !m.repeatable).length} missions complete ·{' '}
               Total XP: {gameState.xp.toLocaleString()}

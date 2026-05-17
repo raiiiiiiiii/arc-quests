@@ -446,6 +446,28 @@
     color: var(--text-muted);
   }
 
+  /* ── Arc Logo Branding ── */
+  .arc-logo {
+    display: inline-block;
+    filter: drop-shadow(0 0 8px rgba(134, 59, 255, 0.6)) drop-shadow(0 0 20px rgba(0, 212, 255, 0.4));
+    animation: arcLogoPulse 3s ease-in-out infinite;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  .arc-logo-sm { height: 28px; width: 28px; }
+  .arc-logo-md { height: 40px; width: 40px; }
+  .arc-logo-lg { height: 60px; width: 60px; }
+  .arc-logo-xl { height: 90px; width: 90px; }
+  .arc-logo-watermark {
+    position: absolute;
+    bottom: 10%; right: 10%;
+    height: 60px; width: 60px;
+    opacity: 0.15;
+    pointer-events: none;
+    filter: grayscale(1) brightness(2);
+  }
+
   /* ── Tooltip ── */
   .tooltip { position: relative; }
 
@@ -524,4 +546,15 @@
   0%, 100% { transform: translate(0, 0) scale(1); }
   33%       { transform: translate(30px, -40px) scale(1.05); }
   66%       { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+@keyframes arcLogoPulse {
+  0%, 100% { 
+    filter: drop-shadow(0 0 8px rgba(134, 59, 255, 0.5)) drop-shadow(0 0 15px rgba(0, 212, 255, 0.3)); 
+    transform: scale(1); 
+  }
+  50% { 
+    filter: drop-shadow(0 0 12px rgba(134, 59, 255, 0.8)) drop-shadow(0 0 30px rgba(0, 212, 255, 0.6)); 
+    transform: scale(1.03); 
+  }
 }
