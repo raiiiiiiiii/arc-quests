@@ -20,7 +20,9 @@
   margin: 0 auto;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 24px;
+  width: 100%;
 }
 
 .navbar-logo {
@@ -93,7 +95,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .btn-switch-network {
