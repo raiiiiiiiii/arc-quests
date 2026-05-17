@@ -1,0 +1,201 @@
+.nft-gallery-page { padding: 100px 0 60px; min-height: 100vh; }
+
+.gallery-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 24px;
+}
+
+.gallery-stat { text-align: center; }
+.gs-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.gs-label { display: block; font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+.gs-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); }
+
+.gallery-section { margin-bottom: 48px; }
+
+.gallery-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.gallery-section-header h2 { font-size: 1.2rem; }
+
+/* NFT Badges Grid */
+.nft-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1100px) { .nft-badges-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px) { .nft-badges-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 450px) { .nft-badges-grid { grid-template-columns: 1fr; } }
+
+.nft-badge-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border-color: rgba(255,215,0,0.25);
+}
+
+.nft-badge-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,215,0,0.08), transparent);
+  pointer-events: none;
+}
+
+.nft-badge-icon-wrap {
+  width: 72px; height: 72px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,150,0,0.1));
+  border: 1px solid rgba(255,215,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  position: relative;
+}
+
+.nft-badge-emoji { filter: drop-shadow(0 0 8px rgba(255,215,0,0.4)); }
+
+.nft-badge-info h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; }
+.nft-badge-time { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-family: var(--font-body); }
+.nft-explorer-link { font-size: 0.72rem; color: var(--neon-blue); text-decoration: none; display: block; margin-top: 6px; }
+.nft-explorer-link:hover { text-decoration: underline; }
+
+.nft-badge-shine {
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: shine 3s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* Achievements Grid */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1100px) { .achievements-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px) { .achievements-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 450px) { .achievements-grid { grid-template-columns: 1fr; } }
+
+.achievement-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.achievement-card.locked {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
+
+.achievement-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.achievement-icon-wrap {
+  width: 64px; height: 64px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-emoji { filter: drop-shadow(0 0 6px rgba(255,255,255,0.3)); }
+
+.achievement-sparkle {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  border-radius: 14px;
+}
+
+.achievement-info { flex: 1; }
+
+.achievement-rarity-tag {
+  display: inline-flex;
+  padding: 2px 8px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.achievement-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.achievement-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.achievement-unlocked-badge {
+  padding: 4px 12px;
+  background: rgba(0,255,136,0.08);
+  border: 1px solid rgba(0,255,136,0.25);
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--neon-green);
+  letter-spacing: 0.05em;
+}
+
+/* Empty State */
+.gallery-empty {
+  text-align: center;
+  padding: 80px 40px;
+}
+
+.gallery-empty-icon { font-size: 4rem; margin-bottom: 16px; }
+.gallery-empty h3 { font-size: 1.4rem; margin-bottom: 10px; }
+.gallery-empty p { color: var(--text-secondary); margin-bottom: 28px; }
