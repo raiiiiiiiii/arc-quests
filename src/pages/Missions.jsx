@@ -10,7 +10,6 @@ import toast from 'react-hot-toast';
 import './Missions.css';
 
 function MissionCard({ mission, isCompleted, isAvailable, isOnCooldown, cooldownText, onStart, loading }) {
-  const rarityMap = { onchain: 'blue', offchain: 'purple' };
   return (
     <motion.div
       className={`mission-card glass-card ${isCompleted && !mission.repeatable ? 'completed' : ''} ${!isAvailable ? 'unavailable' : ''}`}
@@ -22,9 +21,7 @@ function MissionCard({ mission, isCompleted, isAvailable, isOnCooldown, cooldown
       <div className="mission-card-header">
         <div className="mission-big-icon">{mission.icon}</div>
         <div className="mission-tags">
-          <span className={`tag tag-${rarityMap[mission.type]}`}>
-            {mission.type === 'onchain' ? '⛓️ Onchain' : '🎮 Offchain'}
-          </span>
+          <span className="tag tag-blue">⛓️ Onchain</span>
           {mission.repeatable && <span className="tag tag-green">Daily</span>}
           {isCompleted && !mission.repeatable && <span className="tag tag-gold">✅ Done</span>}
         </div>
@@ -65,15 +62,15 @@ function MissionCard({ mission, isCompleted, isAvailable, isOnCooldown, cooldown
 
 export default function Missions() {
   const navigate = useNavigate();
-  const { address, signer, provider, sendTransaction, updateBalance, isOnArcTestnet, switchToArcTestnet, walletType } = useWallet();
+  const { address, signer, provider, sendTransaction, updateBalance, isOnArcTestnet, switchToArcTestnet, walletType, isReconnecting } = useWallet();
   const { gameState, completeMission, unlockAchievement, addNFTBadge, addTxToHistory, isMissionAvailable } = useGame();
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(null);
   const [txPopup, setTxPopup] = useState(null);
 
   useEffect(() => {
-    if (!address) navigate('/connect');
-  }, [address, navigate]);
+    if (!address && !isReconnecting) navigate('/connect');
+  }, [address, isReconnecting, navigate]);
 
   const getCooldownText = (mission) => {
     const last = gameState.missionLastCompleted[mission.id];
@@ -95,11 +92,7 @@ export default function Missions() {
     setLoading(mission.id);
 
     try {
-      if (mission.type === 'onchain') {
-        await handleOnchainMission(mission);
-      } else {
-        await handleOffchainMission(mission);
-      }
+      await handleOnchainMission(mission);
     } finally {
       setLoading(null);
     }
@@ -317,22 +310,55 @@ export default function Missions() {
         else toast.error('Claim Failed (Already claimed?)', { id: 'tx' });
       }
     } else {
-      completeMission(mission.id);
-    }
-  };
+      if (isSandbox) {
+        const mockHash = '0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+        toast.loading(`Confirming ${mission.title}...`, { id: 'tx' });
+        setTimeout(async () => {
+          toast.success(
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span>Transaction Confirmed! (Sandbox)</span>
+              <a href={`${ARC_TESTNET.blockExplorerUrls[0]}/tx/${mockHash}`} style={{ color: '#00d4ff', fontSize: '0.8rem', textDecoration: 'underline' }}>View on Explorer ↗</a>
+            </div>, { id: 'tx', duration: 8000 }
+          );
+          completeMission(mission.id);
+          addTxToHistory({ hash: mockHash, type: mission.title });
+          setTxPopup({ hash: mockHash });
+          setTimeout(() => setTxPopup(null), 6000);
+          
+          if (mission.id === 'faucet_request') unlockAchievement('token_holder');
+          if (mission.id === 'explore_ecosystem') navigate('/ecosystem');
+          
+          const currentBal = parseFloat(localStorage.getItem('arc_sandbox_balance') || '100.0');
+          localStorage.setItem('arc_sandbox_balance', Math.max(0, currentBal - 0.001).toFixed(4));
+          await updateBalance(provider, address);
+        }, 1200);
+        return;
+      }
 
-  const handleOffchainMission = async (mission) => {
-    if (mission.id === 'faucet_request') {
-      window.open(ARC_TESTNET.faucetUrl, '_blank');
-      setTimeout(() => {
+      if (!contract) return;
+      try {
+        const tx = await contract.completeQuest(mission.id, mission.xp);
+        toast.loading(`Confirming ${mission.title}...`, { id: 'tx' });
+        const receipt = await tx.wait();
+        toast.success(
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span>Transaction Confirmed!</span>
+            <a href={`${ARC_TESTNET.blockExplorerUrls[0]}/tx/${receipt.hash}`} target="_blank" rel="noopener noreferrer" style={{ color: '#00d4ff', fontSize: '0.8rem', textDecoration: 'underline' }}>View on Explorer ↗</a>
+          </div>, { id: 'tx', duration: 8000 }
+        );
         completeMission(mission.id);
-        unlockAchievement('token_holder');
-      }, 2000);
-    } else if (mission.id === 'explore_ecosystem') {
-      navigate('/ecosystem');
-      setTimeout(() => completeMission(mission.id), 1000);
-    } else {
-      completeMission(mission.id);
+        addTxToHistory({ hash: receipt.hash, type: mission.title });
+        setTxPopup({ hash: receipt.hash });
+        setTimeout(() => setTxPopup(null), 6000);
+        
+        if (mission.id === 'faucet_request') unlockAchievement('token_holder');
+        if (mission.id === 'explore_ecosystem') navigate('/ecosystem');
+        
+        await updateBalance(provider, address);
+      } catch (err) {
+        if (err.code === 4001 || err.info?.error?.code === 4001) toast.error('Transaction rejected', { id: 'tx' });
+        else toast.error('Transaction Failed (Already completed?)', { id: 'tx' });
+      }
     }
   };
 

@@ -9,8 +9,8 @@ export const ARC_TESTNET = {
     decimals: 18,
   },
   rpcUrls: ['https://rpc.testnet.arc.network'],
-  blockExplorerUrls: ['/explorer'],
-  faucetUrl: '/faucet',
+  blockExplorerUrls: ['https://testnet.arcscan.app'],
+  faucetUrl: 'https://faucet.arc.network',
 };
 
 // Smart Contract Address (Arc Testnet)
@@ -58,7 +58,7 @@ export const MISSIONS = [
     description: 'Request test tokens from Arc faucet',
     xp: 200,
     zone: 1,
-    type: 'offchain',
+    type: 'onchain',
     repeatable: true,
     cooldown: 86400000, // 24 hours
     icon: '💧',
@@ -130,7 +130,7 @@ export const MISSIONS = [
     description: 'Explore the Arc ecosystem dApps',
     xp: 200,
     zone: 1,
-    type: 'offchain',
+    type: 'onchain',
     repeatable: false,
     icon: '🗺️',
   },

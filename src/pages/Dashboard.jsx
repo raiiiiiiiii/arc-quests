@@ -26,12 +26,12 @@ function StatCard({ icon, label, value, color, suffix = '' }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { address, balance, isOnArcTestnet, switchToArcTestnet, walletType } = useWallet();
+  const { address, balance, isOnArcTestnet, switchToArcTestnet, walletType, isReconnecting } = useWallet();
   const { gameState, getXPProgress, getXPForNextLevel, updateLoginStreak, isMissionAvailable } = useGame();
 
   useEffect(() => {
-    if (!address) navigate('/connect');
-  }, [address, navigate]);
+    if (!address && !isReconnecting) navigate('/connect');
+  }, [address, isReconnecting, navigate]);
 
   useEffect(() => {
     updateLoginStreak();

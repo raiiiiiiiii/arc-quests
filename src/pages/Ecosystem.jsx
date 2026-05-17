@@ -55,11 +55,11 @@ const arcStats = [
 
 export default function Ecosystem() {
   const navigate = useNavigate();
-  const { address } = useWallet();
+  const { address, isReconnecting } = useWallet();
 
   useEffect(() => {
-    if (!address) navigate('/connect');
-  }, [address, navigate]);
+    if (!address && !isReconnecting) navigate('/connect');
+  }, [address, isReconnecting, navigate]);
 
   return (
     <div className="ecosystem-page">

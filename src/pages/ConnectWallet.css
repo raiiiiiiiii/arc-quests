@@ -29,14 +29,9 @@
 .connect-container {
   width: 100%;
   max-width: 500px;
-  background: rgba(10,18,35,0.9);
-  backdrop-filter: blur(30px);
-  border: 1px solid rgba(0,212,255,0.15);
-  border-radius: 24px;
   padding: 40px;
   position: relative;
   z-index: 1;
-  box-shadow: 0 20px 80px rgba(0,0,0,0.7);
 }
 
 .connect-header { text-align: center; margin-bottom: 32px; }

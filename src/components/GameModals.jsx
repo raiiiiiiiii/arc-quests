@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { useWallet } from '../context/WalletContext';
+import { ARC_TESTNET } from '../constants/arcChain';
 import './GameModals.css';
 
 // XP Particle Generator
@@ -201,7 +203,12 @@ export function MissionCompletePopup() {
 
 // Transaction success popup (standalone)
 export function TxSuccessPopup({ tx, onClose }) {
+  const { walletType } = useWallet();
   if (!tx) return null;
+  
+  const explorerLink = walletType === 'sandbox' ? `/explorer/tx/${tx.hash}` : `${ARC_TESTNET.blockExplorerUrls[0]}/tx/${tx.hash}`;
+  const targetAttr = walletType === 'sandbox' ? '_self' : '_blank';
+  
   return (
     <AnimatePresence>
       <motion.div
@@ -218,7 +225,9 @@ export function TxSuccessPopup({ tx, onClose }) {
             {tx.hash?.slice(0, 10)}...{tx.hash?.slice(-8)}
           </p>
           <a
-            href={`/explorer/tx/${tx.hash}`}
+            href={explorerLink}
+            target={targetAttr}
+            rel="noopener noreferrer"
             className="tx-explorer-link"
           >
             View on Explorer →

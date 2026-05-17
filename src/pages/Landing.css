@@ -205,7 +205,6 @@
 
 .feature-card {
   padding: 28px;
-  background: var(--gradient-card);
 }
 
 .feature-icon {
@@ -244,17 +243,12 @@
   align-items: flex-start;
   gap: 20px;
   padding: 28px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
   margin-bottom: 2px;
-  transition: var(--transition);
   position: relative;
 }
 
 .journey-step:hover {
-  border-color: var(--border-glass-hover);
-  background: var(--bg-card-hover);
+  transform: translateY(-2px);
 }
 
 .step-number {

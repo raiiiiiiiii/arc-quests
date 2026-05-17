@@ -95,12 +95,12 @@ function NFTBadgeCard({ badge }) {
 
 export default function NFTGallery() {
   const navigate = useNavigate();
-  const { address } = useWallet();
+  const { address, isReconnecting } = useWallet();
   const { gameState } = useGame();
 
   useEffect(() => {
-    if (!address) navigate('/connect');
-  }, [address, navigate]);
+    if (!address && !isReconnecting) navigate('/connect');
+  }, [address, isReconnecting, navigate]);
 
   const unlockedAchievements = gameState.achievements;
   const unlockedCount = unlockedAchievements.length;

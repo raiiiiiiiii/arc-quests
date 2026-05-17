@@ -92,10 +92,10 @@ export default function ConnectWallet() {
       </div>
 
       <motion.div
-        className="connect-container"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        className="connect-container glass-card"
+        initial={{ opacity: 0, scale: 0.95, y: 40 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         {/* Header */}
         <div className="connect-header">

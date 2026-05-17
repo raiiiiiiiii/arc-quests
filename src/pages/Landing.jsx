@@ -170,7 +170,7 @@ export default function Landing() {
             ].map((item, i) => (
               <motion.div
                 key={item.step}
-                className="journey-step"
+                className="journey-step glass-card"
                 initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}

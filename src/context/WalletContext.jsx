@@ -15,6 +15,7 @@ export function WalletProvider({ children }) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isOnArcTestnet, setIsOnArcTestnet] = useState(false);
   const [walletType, setWalletType] = useState(null);
+  const [isReconnecting, setIsReconnecting] = useState(() => !!localStorage.getItem('arc_wallet_type'));
 
   const checkNetwork = useCallback((id) => {
     const arcChainId = ARC_TESTNET.chainIdDecimal;
@@ -256,12 +257,13 @@ export function WalletProvider({ children }) {
       });
       toast.loading('Transaction submitted...', { id: 'tx' });
       const receipt = await tx.wait();
+      const explorerLink = walletType === 'sandbox' ? `/explorer/tx/${receipt.hash}` : `${ARC_TESTNET.blockExplorerUrls[0]}/tx/${receipt.hash}`;
       toast.success(
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <span>Transaction confirmed!</span>
           <a
-            href={`${ARC_TESTNET.blockExplorerUrls[0]}/tx/${receipt.hash}`}
-            target="_blank"
+            href={explorerLink}
+            target={walletType === 'sandbox' ? "_self" : "_blank"}
             rel="noopener noreferrer"
             style={{ color: '#00d4ff', fontSize: '0.8rem', textDecoration: 'underline' }}
           >
@@ -280,7 +282,7 @@ export function WalletProvider({ children }) {
       }
       return null;
     }
-  }, [signer, address, provider, updateBalance]);
+  }, [signer, address, provider, updateBalance, walletType]);
 
   // Listen for account/chain changes
   useEffect(() => {
@@ -312,55 +314,62 @@ export function WalletProvider({ children }) {
     if (!savedWallet) return;
 
     const reconnect = async () => {
-      if (savedWallet === 'sandbox') {
-        await connectSandbox();
-      } else if (savedWallet === 'walletconnect') {
-        try {
-          const wcProvider = await EthereumProvider.init({
-            projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'c552e4b07a1b5fa8bc1ceb485aa5be82',
-            chains: [ARC_TESTNET.chainIdDecimal],
-            rpcMap: { [ARC_TESTNET.chainIdDecimal]: ARC_TESTNET.rpcUrls[0] },
-          });
-          if (wcProvider.session) {
-            const prov = new ethers.BrowserProvider(wcProvider);
-            const sign = await prov.getSigner();
-            const network = await prov.getNetwork();
-            const accounts = await prov.send('eth_accounts', []);
-            if (accounts.length > 0) {
-              setProvider(prov);
-              setSigner(sign);
-              setAddress(accounts[0]);
-              setChainId(network.chainId.toString());
-              setWalletType('walletconnect');
-              checkNetwork(network.chainId.toString());
-              await updateBalance(prov, accounts[0]);
-            }
-          } else {
-            localStorage.removeItem('arc_wallet_type');
-          }
-        } catch {
-          localStorage.removeItem('arc_wallet_type');
-        }
-      } else {
-        const extProvider = savedWallet === 'coinbase' ? (window.coinbaseWalletExtension || window.ethereum) : window.ethereum;
-        if (extProvider) {
-          extProvider.request({ method: 'eth_accounts' }).then(async (accounts) => {
-            if (accounts.length > 0) {
-              const prov = new ethers.BrowserProvider(extProvider);
+      try {
+        if (savedWallet === 'sandbox') {
+          await connectSandbox();
+        } else if (savedWallet === 'walletconnect') {
+          try {
+            const wcProvider = await EthereumProvider.init({
+              projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'c552e4b07a1b5fa8bc1ceb485aa5be82',
+              chains: [ARC_TESTNET.chainIdDecimal],
+              rpcMap: { [ARC_TESTNET.chainIdDecimal]: ARC_TESTNET.rpcUrls[0] },
+            });
+            if (wcProvider.session) {
+              const prov = new ethers.BrowserProvider(wcProvider);
               const sign = await prov.getSigner();
               const network = await prov.getNetwork();
-              setProvider(prov);
-              setSigner(sign);
-              setAddress(accounts[0]);
-              setChainId(network.chainId.toString());
-              setWalletType(savedWallet);
-              checkNetwork(network.chainId.toString());
-              await updateBalance(prov, accounts[0]);
+              const accounts = await prov.send('eth_accounts', []);
+              if (accounts.length > 0) {
+                setProvider(prov);
+                setSigner(sign);
+                setAddress(accounts[0]);
+                setChainId(network.chainId.toString());
+                setWalletType('walletconnect');
+                checkNetwork(network.chainId.toString());
+                await updateBalance(prov, accounts[0]);
+              }
             } else {
               localStorage.removeItem('arc_wallet_type');
             }
-          }).catch(() => localStorage.removeItem('arc_wallet_type'));
+          } catch {
+            localStorage.removeItem('arc_wallet_type');
+          }
+        } else {
+          const extProvider = savedWallet === 'coinbase' ? (window.coinbaseWalletExtension || window.ethereum) : window.ethereum;
+          if (extProvider) {
+            try {
+              const accounts = await extProvider.request({ method: 'eth_accounts' });
+              if (accounts.length > 0) {
+                const prov = new ethers.BrowserProvider(extProvider);
+                const sign = await prov.getSigner();
+                const network = await prov.getNetwork();
+                setProvider(prov);
+                setSigner(sign);
+                setAddress(accounts[0]);
+                setChainId(network.chainId.toString());
+                setWalletType(savedWallet);
+                checkNetwork(network.chainId.toString());
+                await updateBalance(prov, accounts[0]);
+              } else {
+                localStorage.removeItem('arc_wallet_type');
+              }
+            } catch {
+              localStorage.removeItem('arc_wallet_type');
+            }
+          }
         }
+      } finally {
+        setIsReconnecting(false);
       }
     };
     reconnect();
@@ -369,7 +378,7 @@ export function WalletProvider({ children }) {
   return (
     <WalletContext.Provider value={{
       provider, signer, address, chainId, balance,
-      isConnecting, isOnArcTestnet, walletType,
+      isConnecting, isReconnecting, isOnArcTestnet, walletType,
       connectMetaMask, connectCoinbase, connectWalletConnect, connectSandbox, disconnect,
       switchToArcTestnet, sendTransaction, updateBalance,
     }}>

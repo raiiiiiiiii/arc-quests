@@ -44,14 +44,14 @@ function RankBadge({ rank }) {
 
 export default function Leaderboard() {
   const navigate = useNavigate();
-  const { address } = useWallet();
+  const { address, isReconnecting } = useWallet();
   const { gameState } = useGame();
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!address) navigate('/connect');
-  }, [address, navigate]);
+    if (!address && !isReconnecting) navigate('/connect');
+  }, [address, isReconnecting, navigate]);
 
   useEffect(() => {
     // Simulate blockchain fetch
