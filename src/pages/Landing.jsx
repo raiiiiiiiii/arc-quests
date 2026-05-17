@@ -5,19 +5,19 @@ import { useWallet } from '../context/WalletContext';
 import './Landing.css';
 
 const features = [
-  { icon: '⚡', title: 'Real Onchain Quests', desc: 'Complete missions that trigger actual Arc Testnet transactions' },
-  { icon: '🏆', title: 'NFT Achievements', desc: 'Mint soulbound badge NFTs for every milestone you conquer' },
-  { icon: '📊', title: 'Onchain Leaderboard', desc: 'Your rank is stored permanently on Arc blockchain' },
-  { icon: '🌐', title: 'Ecosystem Explorer', desc: 'Discover every protocol, tool, and dApp in the Arc universe' },
-  { icon: '💎', title: 'XP Progression', desc: 'Level up through zones and unlock exclusive content' },
-  { icon: '🔄', title: 'Daily Quests', desc: 'Return daily for streak rewards and repeatable missions' },
+  { icon: '⚡', title: 'Onchain Operations', desc: 'Execute native Arc smart contracts to clear encrypted network sectors.' },
+  { icon: '🏆', title: 'Soulbound Artifacts', desc: 'Mint cryptographic proofs of your tactical milestones directly to your wallet.' },
+  { icon: '📊', title: 'Immutable Hierarchy', desc: 'Your operative rank is permanently hardcoded onto the Arc ledger.' },
+  { icon: '🌐', title: 'Network Recon', desc: 'Scan and interface with live protocols operating within the Arc ecosystem.' },
+  { icon: '💎', title: 'Privilege Escalation', desc: 'Accumulate tactical XP to breach new zones and bypass security thresholds.' },
+  { icon: '🔄', title: 'Recurring Protocols', desc: 'Execute daily operational directives to sustain your network streak.' },
 ];
 
 const stats = [
-  { label: 'Active Questers', value: '12,847' },
-  { label: 'Missions Completed', value: '284,193' },
-  { label: 'NFTs Minted', value: '47,602' },
-  { label: 'Arc Blocks', value: '∞' },
+  { label: 'Active Operatives', value: '12,847' },
+  { label: 'Directives Executed', value: '284,193' },
+  { label: 'Artifacts Forged', value: '47,602' },
+  { label: 'Network Sync', value: 'Live' },
 ];
 
 export default function Landing() {
@@ -47,7 +47,7 @@ export default function Landing() {
             className="hero-badge"
           >
             <span className="glow-dot" />
-            Arc Testnet · Live
+            Arc Testnet · Synchronized
           </motion.div>
 
           <motion.h1
@@ -56,10 +56,10 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
           >
-            Explore the
-            <span className="gradient-text"> Arc Chain</span>
+            Breach the
+            <span className="gradient-text"> Arc Nexus.</span>
             <br />
-            Through Epic Quests
+            Master the Network.
           </motion.h1>
 
           <motion.p
@@ -68,8 +68,7 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-            The ultimate Web3 adventure game on Arc Testnet. Complete onchain missions,
-            earn XP, mint achievement NFTs, and climb the blockchain-powered leaderboard.
+            Initiate your operative sequence. Deploy live transactions, forge cryptographic artifacts, and secure your dominance on the immutable ledger.
           </motion.p>
 
           <motion.div
@@ -82,13 +81,13 @@ export default function Landing() {
               className="btn-primary btn-lg hero-cta"
               onClick={() => navigate('/connect')}
             >
-              <span>⚡</span> Start Your Quest
+              <span>⚡</span> Initialize Uplink
             </button>
             <button
               className="btn-secondary btn-lg"
               onClick={() => navigate('/ecosystem')}
             >
-              <span>🌐</span> Explore Arc
+              <span>🌐</span> Scan Network
             </button>
           </motion.div>
 
@@ -124,9 +123,9 @@ export default function Landing() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <span className="tag tag-blue">Game Features</span>
-            <h2>Everything You Need to<br /><span className="gradient-text">Conquer Arc</span></h2>
-            <p>A fully onchain game experience built for the Arc blockchain ecosystem</p>
+            <span className="tag tag-blue">Tactical Capabilities</span>
+            <h2>Arsenal for<br /><span className="gradient-text">Network Domination</span></h2>
+            <p>Precision-engineered protocols for the elite onchain operative.</p>
           </motion.div>
 
           <div className="features-grid">
@@ -157,16 +156,16 @@ export default function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="tag tag-purple">Your Journey</span>
-            <h2>From Zero to <span className="gradient-text">Arc Legend</span></h2>
+            <span className="tag tag-purple">Operative Sequence</span>
+            <h2>From Initiate to <span className="gradient-text">Apex</span></h2>
           </motion.div>
 
           <div className="journey-steps">
             {[
-              { step: '01', title: 'Connect Wallet', desc: 'Link MetaMask or Coinbase Wallet to Arc Testnet', icon: '🔗' },
-              { step: '02', title: 'Complete Missions', desc: 'Execute real onchain transactions and interactions', icon: '⚡' },
-              { step: '03', title: 'Earn XP & Level Up', desc: 'Progress through 6 unique zones in the Arc universe', icon: '📈' },
-              { step: '04', title: 'Mint Achievement NFTs', desc: 'Forge permanent proof of your blockchain journey', icon: '🏆' },
+              { step: '01', title: 'Establish Connection', desc: 'Interface your cryptographic terminal with the Arc Testnet nodes.', icon: '🔗' },
+              { step: '02', title: 'Execute Directives', desc: 'Deploy live transactions to bypass simulated network security.', icon: '⚡' },
+              { step: '03', title: 'Escalate Privileges', desc: 'Accumulate tactical data to breach heavily restricted zones.', icon: '📈' },
+              { step: '04', title: 'Forge Artifacts', desc: 'Mint soulbound assets as immutable proof of your operational ascent.', icon: '🏆' },
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -200,13 +199,13 @@ export default function Landing() {
             transition={{ duration: 0.6 }}
           >
             <div className="cta-glow" />
-            <h2>Ready to Begin Your<br /><span className="gradient-text">Arc Quest?</span></h2>
-            <p>Join thousands of questers exploring the Arc blockchain ecosystem</p>
+            <h2>Ready to Breach the<br /><span className="gradient-text">Arc Network?</span></h2>
+            <p>Join elite operatives securing the future of the decentralized ecosystem.</p>
             <button
               className="btn-primary btn-lg"
               onClick={() => navigate('/connect')}
             >
-              ⚡ Connect Wallet & Play
+              ⚡ Establish Uplink
             </button>
           </motion.div>
         </div>
@@ -218,17 +217,17 @@ export default function Landing() {
           <div className="footer-inner">
             <div className="footer-brand">
               <span className="navbar-logo-text">Arc<span className="neon-text-blue">Quest</span></span>
-              <p>Built on Arc Testnet · Web3 Adventure Game</p>
+              <p>Powered by Arc Testnet · Tactical Onchain Experience</p>
             </div>
             <div className="footer-links">
-              <a href="https://www.arc.io/" target="_blank" rel="noopener noreferrer">Arc Official</a>
-              <a href="/explorer">Explorer</a>
-              <a href="/faucet">Faucet</a>
-              <a href="https://docs.arc.io/" target="_blank" rel="noopener noreferrer">Docs</a>
+              <a href="https://www.arc.io/" target="_blank" rel="noopener noreferrer">Arc Protocol</a>
+              <a href="/explorer">Network Scan</a>
+              <a href="/faucet">Asset Uplink</a>
+              <a href="https://docs.arc.io/" target="_blank" rel="noopener noreferrer">Intel Docs</a>
             </div>
           </div>
           <div className="footer-bottom">
-            <p>© 2025 Arc Quest · Open source · Built for the Arc ecosystem</p>
+            <p>© 2025 Arc Quest · Decentralized Infrastructure · Open Source</p>
           </div>
         </div>
       </footer>
