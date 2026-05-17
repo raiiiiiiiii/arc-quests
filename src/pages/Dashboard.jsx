@@ -1,325 +1,232 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../context/WalletContext';
 import { useGame } from '../context/GameContext';
-import { ZONES, MISSIONS, ARC_TESTNET } from '../constants/arcChain';
+import { ZONES, ARC_TESTNET } from '../constants/arcChain';
 import './Dashboard.css';
 
-function StatCard({ icon, label, value, color, suffix = '' }) {
-  return (
-    <motion.div
-      className="stat-card glass-card"
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: 'spring', stiffness: 400 }}
-    >
-      <div className="stat-card-icon" style={{ color }}>{icon}</div>
-      <div className="stat-card-info">
-        <span className="stat-card-value" style={{ color }}>
-          {value}<span className="stat-suffix">{suffix}</span>
-        </span>
-        <span className="stat-card-label">{label}</span>
-      </div>
-    </motion.div>
-  );
-}
+// Node Positions on the Map (0-100 percentages)
+const MAP_LAYOUT = [
+  { id: 1, x: 15, y: 50 }, // Genesis
+  { id: 2, x: 35, y: 25 }, // Token
+  { id: 3, x: 55, y: 45 }, // Contract
+  { id: 4, x: 75, y: 20 }, // DeFi
+  { id: 5, x: 85, y: 65 }, // NFT
+  { id: 6, x: 50, y: 85 }, // Summit
+];
+
+// Final Boss Node
+const BOSS_NODE = { id: 999, name: 'Arc Core (Final Boss)', icon: '👹', x: 50, y: 50 };
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { address, balance, isOnArcTestnet, switchToArcTestnet, walletType, isReconnecting } = useWallet();
-  const { gameState, getXPProgress, getXPForNextLevel, updateLoginStreak, isMissionAvailable } = useGame();
+  const { address, balance, isOnArcTestnet, walletType, isReconnecting } = useWallet();
+  const { gameState, getXPProgress, getXPForNextLevel, updateLoginStreak } = useGame();
+
+  const [transitioningTo, setTransitioningTo] = useState(null);
+  const [termLog, setTermLog] = useState('Initializing connection to Arc Testnet...');
 
   useEffect(() => {
     if (!address && !isReconnecting) navigate('/connect');
-  }, [address, isReconnecting, navigate]);
+    updateLoginStreak();
+  }, [address, isReconnecting, navigate, updateLoginStreak]);
 
   useEffect(() => {
-    updateLoginStreak();
-  }, [updateLoginStreak]);
+    if (gameState.txHistory.length > 0) {
+      const lastTx = gameState.txHistory[0];
+      setTermLog(`[TX_LOG] ${lastTx.type || 'Mission'} executed ${lastTx.hash ? `(Hash: ${lastTx.hash.slice(0, 10)}...)` : 'successfully.'}`);
+    } else {
+      setTermLog(`[SYSTEM] Connection secure. Welcome Agent ${gameState.username || address?.slice(0, 6) || 'Unknown'}.`);
+    }
+  }, [gameState.txHistory, gameState.username, address]);
+
+  if (!address) return null;
 
   const xpProgress = getXPProgress(gameState.xp);
   const nextLevelXP = getXPForNextLevel(gameState.xp);
+  const walletIcons = { metamask: '🦊', coinbase: '🔵', walletconnect: '🔗', sandbox: '🎮' };
+  
+  const allZonesCompleted = gameState.unlockedZones.length >= ZONES.length;
 
-  const completedCount = gameState.completedMissions.length;
-  const availableMissions = MISSIONS.filter(m => isMissionAvailable(m.id));
-
-  const walletIcons = { metamask: '🦊', coinbase: '🔵', walletconnect: '🔗' };
-  const shortAddr = address
-    ? `${address.slice(0, 8)}...${address.slice(-6)}`
-    : '';
+  const handleZoneClick = (zone) => {
+    const isUnlocked = gameState.unlockedZones.includes(zone.id) || (zone.id === 999 && allZonesCompleted);
+    
+    if (isUnlocked) {
+      setTransitioningTo(zone);
+      setTimeout(() => {
+        navigate('/missions');
+      }, 2500); // 2.5s cinematic transition
+    }
+  };
 
   return (
-    <div className="dashboard">
-      <div className="container">
-        {/* Header */}
-        <motion.div
-          className="dashboard-header"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div>
-            <h1>
-              Welcome back,{' '}
-              <span className="gradient-text">
-                {gameState.username || shortAddr}
-              </span>
-            </h1>
-            <p className="dashboard-subtitle">
-              {availableMissions.length > 0
-                ? `${availableMissions.length} missions available · Keep your streak alive!`
-                : 'All missions completed! Check back daily.'}
-            </p>
-          </div>
-
-          {!isOnArcTestnet && (
-            <motion.button
-              className="switch-network-banner"
-              onClick={switchToArcTestnet}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              ⚠️ Switch to Arc Testnet to play
-            </motion.button>
-          )}
-        </motion.div>
-
-        {/* Player Profile Card */}
-        <motion.div
-          className="profile-banner glass-card"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className="profile-avatar">
-            <div className="avatar-ring" />
-            <span className="avatar-emoji">{walletIcons[walletType] || '👤'}</span>
-            <div className="avatar-level-badge">{gameState.level}</div>
-          </div>
-
-          <div className="profile-info">
-            <div className="profile-top">
-              <span className="profile-name">{gameState.username || shortAddr}</span>
-              <div className="profile-badges">
-                <span className={`status-badge ${isOnArcTestnet ? 'status-connected' : 'status-warning'}`}>
-                  <span className="glow-dot" style={{ background: isOnArcTestnet ? 'var(--neon-green)' : 'var(--neon-gold)' }} />
-                  {isOnArcTestnet ? ARC_TESTNET.chainName : 'Wrong Network'}
-                </span>
-                <span className="tag tag-blue">Lv {gameState.level}</span>
-              </div>
+    <div className="world-dashboard">
+      {/* ── CINEMATIC TRANSITION OVERLAY ── */}
+      <AnimatePresence>
+        {transitioningTo && (
+          <motion.div
+            className="zone-transition-overlay scanlines"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="transition-content">
+              <motion.div
+                className="transition-icon"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', damping: 12, delay: 0.2 }}
+              >
+                {transitioningTo.icon}
+              </motion.div>
+              <motion.h1
+                className="transition-title"
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                {transitioningTo.name}
+              </motion.h1>
+              <motion.div
+                className="transition-subtitle"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1 }}
+              >
+                INITIALIZING COMBAT PROTOCOLS...
+              </motion.div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            <div className="profile-xp-section">
-              <div className="xp-label-row">
-                <span className="xp-label">XP Progress</span>
-                <span className="xp-value">{gameState.xp.toLocaleString()} / {nextLevelXP.toLocaleString()} XP</span>
-              </div>
-              <div className="progress-bar profile-progress">
-                <motion.div
-                  className="progress-fill"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${xpProgress}%` }}
-                  transition={{ duration: 1, delay: 0.5 }}
+      {/* ── GAME HUD ── */}
+      <div className="game-hud">
+        <div className="hud-left hud-panel">
+          <div className="hud-avatar">
+            {walletIcons[walletType] || '👤'}
+            <div className="hud-level">{gameState.level}</div>
+          </div>
+          <div className="hud-player-info">
+            <span className="hud-player-name">{gameState.username || `${address.slice(0, 8)}...`}</span>
+            <div className="hud-xp-bar-container">
+              <div className="hud-xp-fill" style={{ width: `${xpProgress}%` }} />
+            </div>
+            <div className="hud-xp-text">
+              <span>{gameState.xp.toLocaleString()} XP</span>
+              <span>NEXT: {nextLevelXP.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="hud-right">
+          <div className="hud-stat">
+            <span className="hud-stat-label">Balance</span>
+            <span className="hud-stat-value blue">{parseFloat(balance).toFixed(2)} USDC</span>
+          </div>
+          <div className="hud-stat">
+            <span className="hud-stat-label">Quests</span>
+            <span className="hud-stat-value gold">{gameState.completedMissions.length}</span>
+          </div>
+          <div className="hud-stat">
+            <span className="hud-stat-label">Network</span>
+            <span className={`hud-stat-value ${isOnArcTestnet ? 'green' : 'pink'}`} style={{ fontSize: '0.9rem', marginTop: '4px' }}>
+              {isOnArcTestnet ? '✓ CONNECTED' : '⚠ WRONG NET'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── WORLD MAP ── */}
+      <motion.div
+        className="world-map-container"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="map-grid-bg" />
+        
+        <div className="map-interactive-area">
+          {/* SVG Paths connecting nodes */}
+          <svg className="map-path-svg" preserveAspectRatio="none">
+            {MAP_LAYOUT.map((pos, i) => {
+              if (i === MAP_LAYOUT.length - 1) return null;
+              const next = MAP_LAYOUT[i + 1];
+              const isUnlocked = gameState.unlockedZones.includes(ZONES[i].id) && gameState.unlockedZones.includes(ZONES[i+1]?.id);
+              return (
+                <line
+                  key={`line-${i}`}
+                  x1={`${pos.x}%`} y1={`${pos.y}%`}
+                  x2={`${next.x}%`} y2={`${next.y}%`}
+                  className={`map-path-line ${isUnlocked ? 'active' : ''}`}
                 />
-              </div>
-              <div className="xp-label-row">
-                <span className="xp-sublabel">{xpProgress.toFixed(1)}% to Level {gameState.level + 1}</span>
-                <span className="xp-sublabel">🔥 {gameState.loginStreak} day streak</span>
-              </div>
-            </div>
-          </div>
+              );
+            })}
+            
+            {/* Path to Boss */}
+            {allZonesCompleted && (
+              <>
+                <line x1={`${MAP_LAYOUT[2].x}%`} y1={`${MAP_LAYOUT[2].y}%`} x2="50%" y2="50%" className="map-path-line active" stroke="#ff0055" />
+                <line x1={`${MAP_LAYOUT[5].x}%`} y1={`${MAP_LAYOUT[5].y}%`} x2="50%" y2="50%" className="map-path-line active" stroke="#ff0055" />
+              </>
+            )}
+          </svg>
 
-          <div className="profile-wallet-info">
-            <div className="wallet-detail">
-              <span className="wallet-detail-label">Balance</span>
-              <span className="wallet-detail-value neon-text-blue">{parseFloat(balance).toFixed(4)} ARC</span>
-            </div>
-            <div className="wallet-detail">
-              <span className="wallet-detail-label">Quests Done</span>
-              <span className="wallet-detail-value">{completedCount}</span>
-            </div>
-            <div className="wallet-detail">
-              <span className="wallet-detail-label">NFT Badges</span>
-              <span className="wallet-detail-value">{gameState.nftBadges.length}</span>
-            </div>
-          </div>
-        </motion.div>
+          {/* Standard Zone Nodes */}
+          {ZONES.map((zone, i) => {
+            const pos = MAP_LAYOUT[i];
+            const isUnlocked = gameState.unlockedZones.includes(zone.id);
+            const isCompleted = isUnlocked && gameState.level > zone.unlockLevel + 4; // Arbitrary logic for "completed" look
+            
+            return (
+              <motion.div
+                key={zone.id}
+                className={`map-node ${isUnlocked ? (isCompleted ? 'completed' : 'unlocked') : 'locked'}`}
+                style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+                onClick={() => handleZoneClick(zone)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + i * 0.1 }}
+                whileHover={isUnlocked ? { zIndex: 20 } : {}}
+              >
+                {isUnlocked && <div className="node-ring" />}
+                <div className="node-icon-wrapper">
+                  {isUnlocked ? zone.icon : '🔒'}
+                </div>
+                <div className="node-label">{zone.name}</div>
+                {!isUnlocked && <div className="node-level-req">Requires Lv {zone.unlockLevel}</div>}
+              </motion.div>
+            );
+          })}
 
-        {/* Stats Row */}
-        <div className="stats-row">
-          {[
-            { icon: '⭐', label: 'Total XP', value: gameState.xp.toLocaleString(), color: 'var(--neon-gold)' },
-            { icon: '⚡', label: 'Level', value: gameState.level, color: 'var(--neon-blue)' },
-            { icon: '✅', label: 'Missions', value: completedCount, color: 'var(--neon-green)' },
-            { icon: '🔥', label: 'Streak', value: gameState.loginStreak, color: 'var(--neon-pink)', suffix: 'd' },
-            { icon: '🏆', label: 'NFT Badges', value: gameState.nftBadges.length, color: 'var(--neon-purple)' },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 + i * 0.07 }}
-            >
-              <StatCard {...stat} />
-            </motion.div>
-          ))}
+          {/* Final Boss Node */}
+          <motion.div
+            className={`map-node ${allZonesCompleted ? 'boss unlocked' : 'locked'}`}
+            style={{ left: '50%', top: '50%' }}
+            onClick={() => handleZoneClick(BOSS_NODE)}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1 }}
+            whileHover={allZonesCompleted ? { zIndex: 20 } : {}}
+          >
+            {allZonesCompleted && <div className="node-ring" />}
+            <div className="node-icon-wrapper" style={{ background: allZonesCompleted ? 'rgba(255,0,85,0.1)' : '' }}>
+              {allZonesCompleted ? BOSS_NODE.icon : '❓'}
+            </div>
+            <div className="node-label">{allZonesCompleted ? BOSS_NODE.name : 'Unknown Signal'}</div>
+            {!allZonesCompleted && <div className="node-level-req">Clear all zones</div>}
+          </motion.div>
+
         </div>
+      </motion.div>
 
-        <div className="dashboard-grid">
-          {/* Zone Map */}
-          <motion.div
-            className="dashboard-card glass-card"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="card-header">
-              <h3>Zone Map</h3>
-              <span className="tag tag-blue">{gameState.unlockedZones.length}/{ZONES.length} Unlocked</span>
-            </div>
-            <div className="zone-grid">
-              {ZONES.map(zone => {
-                const isUnlocked = gameState.unlockedZones.includes(zone.id);
-                return (
-                  <motion.div
-                    key={zone.id}
-                    className={`zone-card ${isUnlocked ? 'unlocked' : 'locked'}`}
-                    style={isUnlocked ? { borderColor: `${zone.color}40` } : {}}
-                    whileHover={isUnlocked ? { scale: 1.04 } : {}}
-                  >
-                    <div
-                      className="zone-icon"
-                      style={isUnlocked ? { background: `${zone.color}20` } : {}}
-                    >
-                      {isUnlocked ? zone.icon : '🔒'}
-                    </div>
-                    <span className="zone-name">{zone.name}</span>
-                    {!isUnlocked && (
-                      <span className="zone-unlock-req">Lv {zone.unlockLevel}</span>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-
-          {/* Active Missions */}
-          <motion.div
-            className="dashboard-card glass-card"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.35 }}
-          >
-            <div className="card-header">
-              <h3>Active Missions</h3>
-              <button
-                className="btn-secondary btn-sm"
-                onClick={() => navigate('/missions')}
-              >
-                View All →
-              </button>
-            </div>
-            <div className="mission-list">
-              {availableMissions.slice(0, 5).map(mission => (
-                <div key={mission.id} className="mission-item">
-                  <div className="mission-item-icon">{mission.icon}</div>
-                  <div className="mission-item-info">
-                    <span className="mission-item-name">{mission.title}</span>
-                    <span className="mission-item-desc">{mission.description}</span>
-                  </div>
-                  <div className="mission-item-xp">+{mission.xp} XP</div>
-                </div>
-              ))}
-              {availableMissions.length === 0 && (
-                <div className="empty-state">
-                  <span>🎉</span>
-                  <p>All missions complete! Check back tomorrow.</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Recent Activity */}
-          <motion.div
-            className="dashboard-card glass-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className="card-header">
-              <h3>Recent Activity</h3>
-            </div>
-            <div className="activity-list">
-              {gameState.txHistory.slice(0, 5).map((tx, i) => (
-                <div key={i} className="activity-item">
-                  <div className="activity-dot" />
-                  <div className="activity-info">
-                    <span className="activity-type">{tx.type || 'Transaction'}</span>
-                    {tx.hash ? (
-                      <a
-                        href={`${ARC_TESTNET.blockExplorerUrls[0]}/tx/${tx.hash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="activity-hash-link"
-                      >
-                        {`${tx.hash.slice(0, 10)}...${tx.hash.slice(-6)}`} ↗
-                      </a>
-                    ) : (
-                      <span className="activity-hash">Pending</span>
-                    )}
-                  </div>
-                  <span className="activity-time">
-                    {new Date(tx.timestamp).toLocaleDateString()}
-                  </span>
-                </div>
-              ))}
-              {gameState.txHistory.length === 0 && (
-                <div className="empty-state">
-                  <span>📡</span>
-                  <p>No transactions yet. Start a mission!</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Quick Actions */}
-          <motion.div
-            className="dashboard-card glass-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-          >
-            <div className="card-header">
-              <h3>Quick Actions</h3>
-            </div>
-            <div className="quick-actions">
-              <button className="quick-action" onClick={() => navigate('/missions')}>
-                <span>⚡</span> Start Mission
-              </button>
-              <button
-                className="quick-action"
-                onClick={() => window.open(ARC_TESTNET.faucetUrl, '_blank')}
-              >
-                <span>💧</span> Get Test Tokens
-              </button>
-              <button className="quick-action" onClick={() => navigate('/nft-gallery')}>
-                <span>🏆</span> View Badges
-              </button>
-              <button className="quick-action" onClick={() => navigate('/leaderboard')}>
-                <span>📊</span> Leaderboard
-              </button>
-              <button
-                className="quick-action"
-                onClick={() => window.open(ARC_TESTNET.blockExplorerUrls[0], '_blank')}
-              >
-                <span>🔍</span> Explorer
-              </button>
-              <button className="quick-action" onClick={() => navigate('/ecosystem')}>
-                <span>🌐</span> Ecosystem
-              </button>
-            </div>
-          </motion.div>
-        </div>
+      {/* ── TERMINAL LOG ── */}
+      <div className="terminal-log">
+        <span className="term-prefix">ARC_NEXUS@ROOT:~#</span>
+        <span>{termLog}</span>
+        <span className="term-cursor" />
       </div>
     </div>
   );
